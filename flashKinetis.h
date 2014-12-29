@@ -17,11 +17,11 @@
 #define flashKinetis_h_
 
 #if defined(__MK20DX128__)
-#define FLASH_SIZE				0x0001FFFF
-#define FLASH_SECTOR_SIZE 0x800
+#define FLASH_SIZE			0x0001FFFF
+#define FLASH_SECTOR_SIZE	0x800
 #elif defined(__MK20DX256__)
-#define FLASH_SIZE				0x0003FFFF
-#define FLASH_SECTOR_SIZE 0x800
+#define FLASH_SIZE			0x0003FFFF
+#define FLASH_SECTOR_SIZE	0x800
 #else
 #error NOT SUPPORTED
 #endif
