@@ -40,7 +40,7 @@
   ==================================================================
 */
 
-#define FLASH_ALIGN(address,align) ((unsigned long*)((unsigned long)address & (~align)))
+#define FLASH_ALIGN(address,align) address=((unsigned long*)((unsigned long)address & (~(align-1))))
 
 FASTRUN static int flashExec(void)																	// Execute Flash Command in RAM
 {																																		// Returns non-zero if there was an error
