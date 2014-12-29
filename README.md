@@ -3,7 +3,7 @@ Arduino-Teensy3-Flash
 
 Program the Teensy-Flash
 
-Check if a sector is erased:
+Check sector is erased:
 flashCheckSectorErased()
 
 Ease a sector:
