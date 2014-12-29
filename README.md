@@ -13,8 +13,9 @@ This is to prevent unnecessary stress.
 
 Program a sector with unsigned int:
 flashProgramWord().
-The locations 0x400-0x400f are not written to prevent unnecessary stress to YOU ;-)
+The locations 0x400-0x400f are not written. This is to protect YOU from unnecessary stress.
 (Hope this works, i hav'nt tested it)
+
 
 Please see the example.
 
