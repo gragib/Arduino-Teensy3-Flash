@@ -1,0 +1,23 @@
+#######################################
+# Syntax Coloring Map 
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+flashCheckSectorErased	KEYWORD2
+flashEraseSector	KEYWORD2
+flashProgramWord	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+FLASH_SIZE	LITERAL1
+FLASH_SECTOR_SIZE	LITERAL1
