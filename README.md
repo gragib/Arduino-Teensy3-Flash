@@ -11,7 +11,7 @@ flashEraseSector()
 Before erasing, the function checks the sector if it is empty. If so, it does nothing.
 This is to prevent unnecessary stress.
 
-Program a sector with unsigned int:
+Program with unsigned int:
 flashProgramWord().
 The locations 0x400-0x400f are not written. This is to protect YOU from unnecessary stress.
 (Hope this works, i hav'nt tested it)
