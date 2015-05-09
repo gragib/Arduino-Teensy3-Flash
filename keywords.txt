@@ -14,6 +14,7 @@
 flashCheckSectorErased	KEYWORD2
 flashEraseSector	KEYWORD2
 flashProgramWord	KEYWORD2
+flashSetFlexRAM		KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

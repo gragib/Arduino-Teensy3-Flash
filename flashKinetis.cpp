@@ -26,6 +26,10 @@
 #define FCMD_READ_ONCE              	0x41
 #define FCMD_PROGRAM_ONCE           	0x43
 #define FCMD_ERASE_ALL_BLOCKS       	0x44
+#define FCMD_SET_FLEXRAM				0x81
+
+#define FCMD_SET_FLEXRAM_EEPROM			0x00
+#define FCMD_SET_FLEXRAM_RAM			0xff
 
 #define FTFL_STAT_MGSTAT0 				0x01	// Error detected during sequence
 #define FTFL_STAT_FPVIOL  				0x10	// Flash protection violation flag
@@ -43,7 +47,7 @@
 #define FLASH_ALIGN(address,align) address=((unsigned long*)((unsigned long)address & (~(align-1))))
 
 FASTRUN static void flashExec(volatile uint8_t *fstat) 								// Execute Flash Command in RAM
-{																					// Returns non-zero if there was an error
+{																					
 	*fstat = FTFL_STAT_CCIF;
 	while (!(*fstat & FTFL_STAT_CCIF)) {;}
 }
@@ -81,7 +85,7 @@ int flashCheckSectorErased(unsigned long *address) 									// Check if sector i
 int flashEraseSector(unsigned long *address)										// Erase Flash Sector
 {
 	FLASH_ALIGN(address, FLASH_SECTOR_SIZE);
-	if (flashCheckSectorErased(address))
+	if (flashCheckSectorErased(address)  && (address > 0) )
 		{
 			flashInitCommand(FCMD_ERASE_FLASH_SECTOR, address);
 			__disable_irq();
@@ -106,4 +110,14 @@ int flashProgramWord(unsigned long *address, unsigned long *data)					// Program
 	flashExec(&FTFL_FSTAT);
 	__enable_irq();
 	return (FTFL_FSTAT & (FTFL_STAT_ACCERR | FTFL_STAT_FPVIOL | FTFL_STAT_MGSTAT0));
+}
+
+// Disable EEPROM function and enable use of FLEXRAM as RAM
+void flashSetFlexRAM(void)
+{
+	while (!(FTFL_FSTAT & FTFL_FSTAT_CCIF)) {;}
+	FTFL_FSTAT  = 0x30;
+	FTFL_FCCOB0 = FCMD_SET_FLEXRAM;
+	FTFL_FCCOB1 = FCMD_SET_FLEXRAM_RAM;
+	flashExec(&FTFL_FSTAT);
 }

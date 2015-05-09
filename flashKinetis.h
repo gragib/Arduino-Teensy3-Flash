@@ -32,5 +32,5 @@
 int flashCheckSectorErased(unsigned long *address);
 int flashEraseSector(unsigned long *address);
 int flashProgramWord(unsigned long *address, unsigned long *data);
-
+void flashSetFlexRAM(void);
 #endif
