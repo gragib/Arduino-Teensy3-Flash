@@ -42,13 +42,11 @@
 
 #define FLASH_ALIGN(address,align) address=((unsigned long*)((unsigned long)address & (~(align-1))))
 
-FASTRUN static int flashExec(void)													// Execute Flash Command in RAM
+FASTRUN static int flashExec(volatile uint8_t *fstat) 								// Execute Flash Command in RAM
 {																					// Returns non-zero if there was an error
-	__disable_irq();
-	FTFL_FSTAT = FTFL_STAT_CCIF;
-	while (!(FTFL_FSTAT & FTFL_STAT_CCIF)) {;}
-	__enable_irq();
-	return (FTFL_FSTAT & (FTFL_STAT_ACCERR | FTFL_STAT_FPVIOL | FTFL_STAT_MGSTAT0));
+	*fstat = FTFL_STAT_CCIF;
+	while (!(*fstat & FTFL_STAT_CCIF)) {;}
+	return (*fstat & (FTFL_STAT_ACCERR | FTFL_STAT_FPVIOL | FTFL_STAT_MGSTAT0));
 }
 
 static void flashInitCommand(unsigned char command, unsigned long *address)
@@ -75,7 +73,10 @@ int flashCheckSectorErased(unsigned long *address) 									// Check if sector i
 	FTFL_FCCOB4 = (unsigned char)(num >> 8);										// Number of longwords
 	FTFL_FCCOB5 = (unsigned char)(num);
 	FTFL_FCCOB6 = FTFL_READ_MARGIN_NORMAL;
-	return flashExec();
+	__disable_irq();
+	int ret = flashExec(&FTFL_FSTAT);
+	__enable_irq();
+	return ret;
 }
 
 int flashEraseSector(unsigned long *address)										// Erase Flash Sector
@@ -84,7 +85,10 @@ int flashEraseSector(unsigned long *address)										// Erase Flash Sector
 	if (flashCheckSectorErased(address))
 		{
 			flashInitCommand(FCMD_ERASE_FLASH_SECTOR, address);
-			return flashExec();
+			__disable_irq();
+			int ret = flashExec(&FTFL_FSTAT);
+			__enable_irq();
+			return ret;			
 		}
 	return 0;
 }
@@ -99,6 +103,8 @@ int flashProgramWord(unsigned long *address, unsigned long *data)					// Program
 	FTFL_FCCOB5 = (unsigned char)(*data >> 16);
 	FTFL_FCCOB6 = (unsigned char)(*data >> 8);
 	FTFL_FCCOB7 = (unsigned char)*data;
-	return flashExec();
-
+	__disable_irq();
+	int ret = flashExec(&FTFL_FSTAT);
+	__enable_irq();
+	return ret;
 }
