@@ -1,6 +1,10 @@
 Arduino-Teensy3-Flash
 =====================
 
+WARNING:
+BE VERY CAREFUL, AND BE SURE TO HAVE SOME SPARE TEENSY 3.X. IT'S LIKELY THAT YOU WILL NEED THEM. THIS IS MEANT VERY SERIOUSLY.
+
+
 Program the Teensy-Flash
 
 Check sector is erased:
