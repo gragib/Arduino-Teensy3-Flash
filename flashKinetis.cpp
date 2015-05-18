@@ -98,7 +98,7 @@ int flashEraseSector(unsigned long *address)										// Erase Flash Sector
 
 int flashProgramWord(unsigned long *address, unsigned long *data)					// Program Flash, one long word (32 Bit)
 {
-	FLASH_ALIGN(address, 0x03);
+	FLASH_ALIGN(address, 0x04);
 	if (((((unsigned long)address)>=0x400) && ((unsigned long)address)<=0x40C))
 		return 0;																	// Make sure not to write 0x400 - 0x40F
 	flashInitCommand(FCMD_PROGRAM_LONG_WORD, address);
