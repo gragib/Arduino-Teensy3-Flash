@@ -30,7 +30,11 @@
 #include "WProgram.h"
 
 int flashCheckSectorErased(unsigned long *address);
-int flashEraseSector(unsigned long *address);
-int flashProgramWord(unsigned long *address, unsigned long *data);
+int flashEraseSector(unsigned long *address, bool allowFirstSector=false);
+int flashProgramWord(unsigned long *address, unsigned long *data, bool allowFirstSector=false, bool overrideSafetyForConfig=false);
 void flashSetFlexRAM(void);
+
+int flashSecurityLockBits(uint8_t newValueForFSEC=0x64); // 0x64 appears to be one of the safer values to use here.
+void flashQuickUnlockBits();
 #endif
+
