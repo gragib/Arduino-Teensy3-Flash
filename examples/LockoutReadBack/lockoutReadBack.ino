@@ -1,9 +1,9 @@
 /* lockoutReadBack.ino; a simplistic example of using methods to lock and
 unlock the security bits in Teensy 3.1 @ FTFL_FSEC's source copy.
 
-Recommended implementation: In setup() add;
+Suggested implementation: In setup() add;
 
-	if(FTLF_FSEC!=0x64) flashSecurityLockBits();
+	if(FTFL_FSEC!=0x64) flashSecurityLockBits();
 	
 Somewhere else in the sketch/program include a method obscure enough to
 protect your work from prying eyes to unlock it using similar;
@@ -17,19 +17,12 @@ This way you can lock your Teensy to the point that;
 	code you last intended.
 	
 
-The Author bears you no malice but cannot help if you destroy any thing
-using these methods, please be careful and consider making sure you have a
-reasonable understanding of anybody else's code you intend to execute on
-your hardware before executing it - it is your choice to execute so you
-will bear all responsibility toward yourself with regard to this sketch
-and the associated methods.
-
 WARNING!! DANGER!!!
 Setting certain values in FTFL_FSEC and then pressing the 'program' button
 WILL brick your Teensy 3.1 in ways that are not recoverable, the value
 0x64 is as aggressively locked as the device can be made by this register
-alone and is the only value the Author tested at any great length to
-become satisfied that it is a good value to publish with.
+alone and is the only value the Author tested at any great length, in terms
+of being able to use the unlocking method reliably repeatedly.
 
 */
 
@@ -57,9 +50,9 @@ void loop() {
       Serial.println(FTFL_FSEC,HEX);
     break;
     case 'b':
-      nn=flashSecurityLockBits(); // a value can be specified but the
-      Serial.print("Flash security bits "); // default value has been
-      if(nn) Serial.print("not "); // tested reasonably vigorously.
+      nn=flashSecurityLockBits();
+      Serial.print("Flash security bits ");
+      if(nn) Serial.print("not ");
       Serial.println("written successfully");
       Serial.println("\nHit the program button to very basically reset Teensy now.");
     break;
