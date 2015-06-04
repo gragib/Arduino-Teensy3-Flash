@@ -82,9 +82,10 @@ int flashCheckSectorErased(unsigned long *address) 									// Check if sector i
 	return (FTFL_FSTAT & (FTFL_STAT_ACCERR | FTFL_STAT_FPVIOL | FTFL_STAT_MGSTAT0));
 }
 
-int flashEraseSector(unsigned long *address)										// Erase Flash Sector
+int flashEraseSector(unsigned long *address, bool allowFirstSector)					// Erase Flash Sector
 {
 	FLASH_ALIGN(address, FLASH_SECTOR_SIZE);
+	if((unsigned long)address<FLASH_SECTOR_SIZE) if(!allowFirstSector) return -1;	// Won't erase first sector unless flagged end user is sure.
 	if (flashCheckSectorErased(address)  && (address > 0) )
 		{
 			flashInitCommand(FCMD_ERASE_FLASH_SECTOR, address);
@@ -96,11 +97,12 @@ int flashEraseSector(unsigned long *address)										// Erase Flash Sector
 	return 0;
 }
 
-int flashProgramWord(unsigned long *address, unsigned long *data)					// Program Flash, one long word (32 Bit)
+int flashProgramWord(unsigned long *address, unsigned long *data, bool aFS, bool oSFC)	// Program Flash, one long word (32 Bit)
 {
 	FLASH_ALIGN(address, 0x04);
+	if((unsigned long)address<FLASH_SECTOR_SIZE) if(!aFS) return -1;		// no writing in first sector unless end user is sure.
 	if (((((unsigned long)address)>=0x400) && ((unsigned long)address)<=0x40C))
-		return 0;																	// Make sure not to write 0x400 - 0x40F
+		if(!oSFC) return -2;														// Make sure not to write 0x400 - 0x40F
 	flashInitCommand(FCMD_PROGRAM_LONG_WORD, address);
 	FTFL_FCCOB4 = (unsigned char)(*data >> 24);            							// Enter the long word to be programmed
 	FTFL_FCCOB5 = (unsigned char)(*data >> 16);
@@ -120,4 +122,96 @@ void flashSetFlexRAM(void)
 	FTFL_FCCOB0 = FCMD_SET_FLEXRAM;
 	FTFL_FCCOB1 = FCMD_SET_FLEXRAM_RAM;
 	flashExec(&FTFL_FSTAT);
+}
+
+
+/* FTFL_FSEC
+
+B7-B6 KEYEN Backdoor Key Security Enable
+  These bits enable and disable backdoor key access to the flash memory module.
+  00 Backdoor key access disabled
+  01 Backdoor key access disabled (preferred KEYEN state to disable backdoor key access)
+  10 Backdoor key access enabled
+  11 Backdoor key access disabled (Default)
+
+B5-B6 MEEN Mass Erase Enable Bits
+  Enables and disables mass erase capability of the flash memory module. The state of the MEEN bits is
+  only relevant when the SEC bits are set to secure outside of NVM Normal Mode. When the SEC field is
+  set to unsecure, the MEEN setting does not matter.
+  00 Mass erase is enabled
+  01 Mass erase is enabled
+  10 Mass erase is disabled
+  11 Mass erase is enabled
+
+B3–B2 FSLACC Freescale Failure Analysis Access Code
+  These bits enable or disable access to the flash memory contents during returned part failure analysis at
+  Freescale. When SEC is secure and FSLACC is denied, access to the program flash contents is denied
+  and any failure analysis performed by Freescale factory test must begin with a full erase to unsecure the
+  part. When access is granted (SEC is unsecure, or SEC is secure and FSLACC is granted), Freescale factory
+  testing has visibility of the current flash contents. The state of the FSLACC bits is only relevant when the
+  SEC bits are set to secure. When the SEC field is set to unsecure, the FSLACC setting does not matter.
+  00 Freescale factory access granted
+  01 Freescale factory access denied
+  10 Freescale factory access denied
+  11 Freescale factory access granted
+
+B1–B0 SEC Flash Security
+  These bits define the security state of the MCU. In the secure state, the MCU limits access to flash
+  memory module resources. The limitations are defined per device and are detailed in the Chip
+  Configuration details. If the flash memory module is unsecured using backdoor key access, the SEC bits
+  are forced to 10b.
+  00 MCU security status is secure
+  01 MCU security status is secure
+  10 MCU security status is unsecure (The standard shipping condition of the flash memory module is unsecure.)
+  11 MCU security status is secure
+
+    FTFL_FSEC=0x64; // 0b1100100 = 100 = the value robsoles will recommend locking up with.
+  
+*/
+
+
+
+int flashSecurityLockBits(uint8_t newValueForFSEC)
+{
+  while (!(FTFL_FSTAT & FTFL_STAT_CCIF)) {;}
+	FTFL_FSTAT  = 0x30;
+	FTFL_FCCOB0 = FCMD_PROGRAM_LONG_WORD;
+	FTFL_FCCOB1 = 0;
+	FTFL_FCCOB2 = 4;
+	FTFL_FCCOB3 = 0xC;
+  
+	FTFL_FCCOB4 = 0xFF; // It is not possible to turn bits on without erasing a larger block, I am
+	FTFL_FCCOB5 = 0xFF; // using all on value 
+	FTFL_FCCOB6 = 0xFF; // 
+	FTFL_FCCOB7 = newValueForFSEC;
+	__disable_irq();
+  flashExec(&FTFL_FSTAT);
+	__enable_irq();
+	return (FTFL_FSTAT & (FTFL_STAT_ACCERR | FTFL_STAT_FPVIOL | FTFL_STAT_MGSTAT0));
+}
+
+void flashQuickUnlockBits()
+{
+  while (!(FTFL_FSTAT & FTFL_STAT_CCIF)) {;}
+	FTFL_FSTAT  = 0x30;
+	FTFL_FCCOB0 = FCMD_ERASE_FLASH_SECTOR;
+	FTFL_FCCOB1 = 0;
+	FTFL_FCCOB2 = 0;
+	FTFL_FCCOB3 = 0;
+
+	__disable_irq();
+	FTFL_FSTAT = FTFL_STAT_CCIF;
+	while (!(FTFL_FSTAT & FTFL_STAT_CCIF)) {;}
+	FTFL_FSTAT  = 0x30;
+	FTFL_FCCOB0 = FCMD_PROGRAM_LONG_WORD;
+	FTFL_FCCOB1 = 0;
+	FTFL_FCCOB2 = 4;
+	FTFL_FCCOB3 = 0xC;
+  
+	FTFL_FCCOB4 = 0xFF;
+	FTFL_FCCOB5 = 0xFF;
+	FTFL_FCCOB6 = 0xFF;
+	FTFL_FCCOB7 = 0xFE;
+	FTFL_FSTAT = FTFL_STAT_CCIF;
+	while (!(FTFL_FSTAT & FTFL_STAT_CCIF)) {;}
 }
