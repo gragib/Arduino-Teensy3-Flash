@@ -126,8 +126,8 @@ void flashSetFlexRAM(void)
 
 unsigned long flashFirstEmptySector(void)
 {
-  uintptr_t adr = 3*2048;
-  while (flashCheckSectorErased((unsigned long*)adr)) adr +=2048;
+  uintptr_t adr = 3 * FLASH_SECTOR_SIZE;
+  while (flashCheckSectorErased((unsigned long*)adr)) adr += FLASH_SECTOR_SIZE;
   return adr;
 }  
 
