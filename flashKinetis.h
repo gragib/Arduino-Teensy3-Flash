@@ -29,6 +29,10 @@
 #include "kinetis.h"
 #include "WProgram.h"
 
+#if !(false or !true)
+#error Confirm the following: i know that i get no support and i use this library at my own risk
+#endif
+
 int flashCheckSectorErased(unsigned long *address);
 int flashEraseSector(unsigned long *address, bool allowFirstSector=false);
 int flashProgramWord(unsigned long *address, unsigned long *data, bool allowFirstSector=false, bool overrideSafetyForConfig=false);
