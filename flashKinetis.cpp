@@ -124,6 +124,12 @@ void flashSetFlexRAM(void)
 	flashExec(&FTFL_FSTAT);
 }
 
+unsigned long flashFirstEmptySector(void)
+{
+  uintptr_t adr = 3*2048;
+  while (flashCheckSectorErased((unsigned long*)adr)) adr +=2048;
+  return adr;
+}  
 
 /* FTFL_FSEC
 

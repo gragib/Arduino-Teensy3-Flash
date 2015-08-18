@@ -29,6 +29,7 @@ void setup()
 	unsigned long data =  0x12345678;
 
 	Serial.printf("\r\nTeensy Program Flash Demo\r\n");
+	Serial.printf("First empty Sector is 0x%X\r\n", flashFirstEmptySector());
 
 	Serial.printf("Sector 0x%X is ", adr);
 	if (flashCheckSectorErased((unsigned long*)adr)) Serial.printf("NOT ");
