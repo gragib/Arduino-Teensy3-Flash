@@ -18,7 +18,7 @@ This is to prevent unnecessary stress.
 
 Program with unsigned int:
 flashProgramWord().
-The locations 0x400-0x400f are not written. This is to protect YOU from unnecessary stress.
+The locations 0x400-0x40f are not written. This is to protect YOU from unnecessary stress.
 
 
 
